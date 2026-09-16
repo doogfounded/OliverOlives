@@ -2,13 +2,18 @@
 #include "core_engine.h"
 #include <numeric>
 
+// Add to core_engine.cpp
+extern "C" void run_gpu_compute(uint32_t *host_data, size_t count);
+
 void ComputeEngine::process_buffer(uint32_t *data, size_t count) {
+  // 1. Offload buffer processing to the GPU kernel
+  run_gpu_compute(data, count);
+
+  // 2. CPU checks final values
   for (size_t i = 0; i < count; ++i) {
-    data[i] = (data[i] ^ 0x5A5A5A5A) + 1;
     checksum_ += data[i];
   }
 }
-
 // C-Linkage trampoline functions
 void *engine_create() { return static_cast<void *>(new ComputeEngine()); }
 
